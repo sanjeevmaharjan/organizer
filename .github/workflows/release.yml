@@ -20,7 +20,7 @@ jobs:
           - platform: linux-x86_64
             runner: ubuntu-latest
             qt_host: linux
-            qt_arch: gcc_64
+            qt_arch: linux_gcc_64
           - platform: windows-x64
             runner: windows-latest
             qt_host: windows
@@ -69,6 +69,7 @@ jobs:
             --appdir AppDir \
             --executable build/folder-organizer \
             --desktop-file packaging/folder-organizer.desktop \
+            --icon-file packaging/folder-organizer.svg \
             --plugin qt \
             --output appimage
           appimage="$(find . -maxdepth 1 -type f -name '*.AppImage' \
