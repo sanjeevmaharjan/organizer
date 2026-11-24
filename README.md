@@ -1,6 +1,6 @@
 # Folder Organizer
 
-A Qt 6 desktop application that sorts files in a selected folder into
+A Qt 6 desktop application that sorts files in a selected folder (e.g. ~/Downloads) into
 type-based subfolders. It previews planned moves before changing anything and
 never overwrites an existing file.
 
