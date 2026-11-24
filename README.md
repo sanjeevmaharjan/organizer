@@ -37,6 +37,14 @@ Files are categorized as `Documents`, `Images`, `Audio`, `Video`, `Archives`,
 `Code`, or `Other`. Only regular files directly inside the selected folder are
 processed. Existing subfolders and symbolic links are left untouched.
 
+## Disclaimer
+
+Folder Organizer is provided "as is", without warranties to the extent permitted
+by law. It moves files on your behalf, so review the preview carefully and keep
+backups of important data. The authors are not liable for loss or damage
+resulting from use of the software to the extent permitted by applicable law.
+This disclaimer does not limit rights that cannot be excluded by law.
+
 ## Test
 
 ```sh
