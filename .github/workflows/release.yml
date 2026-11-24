@@ -81,11 +81,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force dist | Out-Null
-          Copy-Item build/Release/folder-organizer.exe dist/
-          windeployqt --release --no-translations --compiler-runtime dist/folder-organizer.exe
-          Compress-Archive -Path dist/* -DestinationPath FolderOrganizer-windows-x64.zip
-          Move-Item FolderOrganizer-windows-x64.zip dist/
+          New-Item -ItemType Directory -Force -Path dist, package | Out-Null
+          Copy-Item build/Release/folder-organizer.exe package/
+          windeployqt --release --no-translations --compiler-runtime package/folder-organizer.exe
+          Compress-Archive -Path package/* -DestinationPath dist/FolderOrganizer-windows-x64.zip
 
       - name: Package macOS application
         if: runner.os == 'macOS'
