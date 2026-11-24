@@ -4,6 +4,8 @@ A Qt 6 desktop application that sorts files in a selected folder into
 type-based subfolders. It previews planned moves before changing anything and
 never overwrites an existing file.
 
+[![Release](https://github.com/sanjeevmaharjan/organizer/actions/workflows/release.yml/badge.svg)](https://github.com/sanjeevmaharjan/organizer/actions/workflows/release.yml)
+
 ## AI acknowledgment
 
 AI assistance was used in the development of this project.
