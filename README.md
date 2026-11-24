@@ -41,9 +41,27 @@ processed. Existing subfolders and symbolic links are left untouched.
 ctest --test-dir build --output-on-failure
 ```
 
+## GitHub releases
+
+Releases are built and published by GitHub Actions when a version tag is pushed:
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow builds and tests Linux, Windows, and macOS packages, then attaches
+them to the tag's GitHub Release. Linux releases are AppImages; Windows and
+macOS releases are ZIP archives. Repository Actions must be enabled, and the
+workflow's `GITHUB_TOKEN` needs permission to write releases.
+
 ## Project layout
 
 ```text
+.github/
+  workflows/ release automation
+packaging/
+  folder-organizer.desktop
 src/
   app/       Application entry point
   core/      File classification, planning, and organizing

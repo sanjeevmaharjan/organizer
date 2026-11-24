@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x86_64
+            runner: ubuntu-latest
+            qt_host: linux
+            qt_arch: gcc_64
+          - platform: windows-x64
+            runner: windows-latest
+            qt_host: windows
+            qt_arch: win64_msvc2022_64
+          - platform: macos
+            runner: macos-15-intel
+            qt_host: mac
+            qt_arch: clang_64
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: ${{ matrix.qt_host }}
+          target: desktop
+          arch: ${{ matrix.qt_arch }}
+          cache: true
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Package Linux AppImage
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          mkdir -p dist
+          curl -fsSL \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage \
+            -o linuxdeploy-x86_64.AppImage
+          curl -fsSL \
+            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage \
+            -o linuxdeploy-plugin-qt
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt
+          export PATH="$PWD:$PATH"
+          APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --executable build/folder-organizer \
+            --desktop-file packaging/folder-organizer.desktop \
+            --plugin qt \
+            --output appimage
+          appimage="$(find . -maxdepth 1 -type f -name '*.AppImage' \
+            ! -name 'linuxdeploy-x86_64.AppImage' -print -quit)"
+          test -n "$appimage"
+          mv "$appimage" dist/FolderOrganizer-linux-x86_64.AppImage
+
+      - name: Package Windows application
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item build/Release/folder-organizer.exe dist/
+          windeployqt --release --no-translations --compiler-runtime dist/folder-organizer.exe
+          Compress-Archive -Path dist/* -DestinationPath FolderOrganizer-windows-x64.zip
+          Move-Item FolderOrganizer-windows-x64.zip dist/
+
+      - name: Package macOS application
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p dist
+          macdeployqt build/folder-organizer.app
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/folder-organizer.app dist/FolderOrganizer-macos.zip
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download platform packages
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}

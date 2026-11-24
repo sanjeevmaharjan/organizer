@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Folder Organizer
+Exec=folder-organizer
+Categories=Utility;FileTools;
+Terminal=false

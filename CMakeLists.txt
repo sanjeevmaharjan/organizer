@@ -27,6 +27,11 @@ add_executable(folder-organizer
     src/ui/MainWindow.cpp
     src/ui/MainWindow.h
 )
+set_target_properties(folder-organizer PROPERTIES
+    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_BUNDLE_NAME "Folder Organizer"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "org.folderorganizer.desktop"
+)
 target_link_libraries(folder-organizer PRIVATE organizer_core Qt6::Widgets)
 
 include(CTest)
